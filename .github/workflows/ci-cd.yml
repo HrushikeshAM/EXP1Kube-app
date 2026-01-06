@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - name: Checkout code
@@ -23,4 +23,4 @@ jobs:
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f https://raw.githubusercontent.com//HrushikeshAM/EXP1Kube-manifest/main/deployment.yaml
+        kubectl apply -f https://raw.githubusercontent.com/HrushikeshAM/EXP1Kube-manifest/main/deployment.yaml
