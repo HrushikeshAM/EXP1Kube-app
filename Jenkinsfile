@@ -37,10 +37,11 @@ pipeline {
     post {
         success {
             echo 'Pipeline successful. Cleaning local Docker images...'
-            sh """
-                docker rmi ${DOCKERHUB_USER}/${IMAGE_NAME}:latest || true
-                docker image prune -f
+            bat """
+            docker rmi %DOCKERHUB_USER%/%IMAGE_NAME%:latest || exit 0
+            docker image prune -f
             """
+
         }
 
         failure {
