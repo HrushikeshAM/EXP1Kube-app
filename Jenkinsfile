@@ -2,10 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_USERNAME = credentials('dockerhub-username')
-        DOCKER_PASSWORD = credentials('dockerhub-password')
         IMAGE_NAME = "cicdprac-app"
-        FULL_IMAGE = "${DOCKER_USERNAME}/${IMAGE_NAME}"
+        DOCKER_CREDS = "dockerhub-creds"
+        DOCKERHUB_USER = "hrushi242001"
     }
 
     stages {
@@ -16,36 +15,30 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
-            steps {
-                sh """
-                    echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
-                """
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                sh """
-                    docker build -t ${FULL_IMAGE}:latest .
-                """
+                script {
+                    dockerImage = docker.build("${DOCKERHUB_USER}/${IMAGE_NAME}:latest")
+                }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                sh """
-                    docker push ${FULL_IMAGE}:latest
-                """
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDS) {
+                        dockerImage.push('latest')
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline successful. Cleaning old Docker images...'
+            echo 'Pipeline successful. Cleaning local Docker images...'
             sh """
-                docker rmi ${FULL_IMAGE}:latest || true
+                docker rmi ${DOCKERHUB_USER}/${IMAGE_NAME}:latest || true
                 docker image prune -f
             """
         }
